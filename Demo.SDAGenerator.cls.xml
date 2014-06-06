@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.1 (Build 608U)" ts="2014-06-06 14:37:24">
+<Class name="Demo.SDAGenerator">
+<Description>
+Convert HL7 into SDA</Description>
+<ClassType>persistent</ClassType>
+<IncludeCode>Ensemble</IncludeCode>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>63344,44321.710184</TimeChanged>
+<TimeCreated>63344,43662.07318</TimeCreated>
+
+<Property name="TargetConfigName">
+<Description>
+The name of an operation to send the SDA to</Description>
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<Description>
+Will send an Ens.StreamContainer with the SDA from this HL7 to TargetConfigName</Description>
+<FormalSpec>pRequest:Ens.Request,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set pResponse = ##class(Ens.StringContainer).%New()
+	set sc=##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.sdaStream)
+	set sdaMessage = ##class(Ens.StreamContainer).%New()
+	set sdaMessage.Stream = sdaStream
+	quit:$$$ISERR(sc) sc
+	quit ..SendRequestAsync(..TargetConfigName,sdaMessage,0)
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>SDAGeneratorDefaultData</DefaultData>
+<Data name="SDAGeneratorDefaultData">
+<Subscript>"SDAGenerator"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
