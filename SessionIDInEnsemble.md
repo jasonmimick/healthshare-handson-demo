@@ -74,6 +74,7 @@ method OnMessage(request as Foo.FindMessageInSessionRequest,
 		set rowCount=0
 		while ( rs.Next() ) {
 			if ( rowCount>=1 ) {
+				set rowCount=rowCount+1
 				continue
 			}
 			set mbi=rs.Get("MessageBodyId")
