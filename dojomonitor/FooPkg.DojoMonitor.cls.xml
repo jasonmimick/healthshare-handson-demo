@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2014.1 (Build 537U)" ts="2014-06-12 15:36:53">
+<Class name="FooPkg.DojoMonitor">
+<Super>%CSP.Page</Super>
+<TimeChanged>63230,62619.437808</TimeChanged>
+<TimeCreated>63229,79868.43199</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<
+	<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>How Healthy is my HealthShare!</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+     <link href="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet">
+     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+     <script src="Chart.js"></script>
+     <meta name = "viewport" content = "initial-scale = 1, user-scalable = no">
+		<style>
+			canvas{
+			}
+		</style>
+	</head>
+
+     <script type="text/javascript">
+      var error="<span class=\"label label-danger\">Danger</span>";
+      var warning="<span class=\"label label-warning\">Warning</span>";
+      var info="<span class=\"label label-info\">Info</span>";
+      var ok="<span class=\"label label-success\">OK</span>";
+    function loadEvents() {
+	    var events=#(##class(FooPkg.DojoMonitor).GetEventLogs(%request.Get("el",10)))#;
+	   	console.dir(events);
+	    for (var i=0;i<events.length;i++) {
+		    
+		    var e = events[i];
+		    if ( e.Type == 4 ) { 
+		    	//console.dir(e);
+		    	continue; 
+		    	
+		    }
+		    var trClass="success"; x= e.Text;
+		    if ( e.Type == 4 ) { trClass="info"; }
+		    if ( e.Type == 3 ) { trClass="warning"; }
+		    if ( e.Type == 2 ) { trClass="danger"; }
+		    var longAgo=Math.ceil( (Date.now()-(new Date(e.TimeLogged)).getTime())/(1000*60*60) ) + " hours ago";
+	    	$("#event-table").append("<tr class="+trClass+"><td>"+x+"</td><td>"+e.TimeLogged+"</td><td>"+longAgo+"</td></tr>");
+	    	//console.dir( $("#event-table"));		
+	    }
+	    $("#event-table-caption").append("<b>Event Log</b> <span class=\"badge\" >"+events.length+"</span>");
+	    
+    } 
+    
+    function loadThroughput() {
+	 var msgCountData = #(##class(FooPkg.DojoMonitor).GetMessageCount(%request.Get("db",20)))#;
+	 var errCountData = #(##class(FooPkg.DojoMonitor).GetMessageCount(%request.Get("db",20),1))#;
+	 
+	 var lineChartData = {
+			labels : msgCountData.labels,
+			datasets : [
+				{
+					fillColor : "rgba(220,220,220,0.5)",
+					strokeColor : "rgba(220,220,220,1)",
+					pointColor : "rgba(220,220,220,1)",
+					pointStrokeColor : "#fff",
+					data : msgCountData.counts 
+				}
+			,
+				{
+					fillColor : "rgba(151,187,205,0.5)",
+					strokeColor : "rgba(151,187,205,1)",
+					pointColor : "rgba(151,187,205,1)",
+					pointStrokeColor : "#fff",
+					data : errCountData.counts
+				}
+			]
+			
+		}
+
+	var myLine = new Chart(document.getElementById("throughput-canvas").getContext("2d")).Line(lineChartData);
+	
+   		var msgCount=0;
+   		for (var i=0;i<msgCountData.counts.length;i++) {
+	   		msgCount += msgCountData.counts[i];
+   		}
+   		var errCount=0;
+   		for (var i=0;i<errCountData.counts.length;i++) {
+	   		errCount += errCountData.counts[i];
+   		}
+   		
+   		$("#message-count").text(msgCount);
+   		$("#error-count").text(errCount);
+   		//alert("msgCount="+msgCount+" errCount="+errCount);
+    }
+    
+    
+    $( document ).ready( function() {
+	   loadEvents(); 
+	   loadThroughput();
+    });
+    </script>
+</head>
+<body>
+>
+	// calculate system up time
+	
+	
+		Set tSecs = $P($ZH,".",1)
+		Set tDays = tSecs\86400
+
+		Set tSeconds = tSecs#86400
+		Set tHours = tSeconds\3600
+		Set tMinutes = (tSeconds#3600)\60
+		#;YSD2331 Set tUpTime = tDays _ "d " _ $J(tHours,2) _ "h " _ $TR($J(tMinutes,2)," ","0") _ "m"
+		Set tUpTime =  tDays_" days "_$J(tHours,2)_" hours "_$TR($J(tMinutes,2)," ","0")_" minutes"
+		
+ &html<
+    <h4 id="greeting">HealthShare Monitor <i>Server:</i> #($system.INetInfo.LocalHostName())# <i>Namespace:</i>#($namespace)# #($ZD($H))#</h4>
+   
+   <div class="alert alert-warning">System uptime: #(tUpTime)# <br/>Production <b>#(^Ens.Runtime("Name"))#</b> Last Started #(^Ens.Runtime("StartTime"))#</div>
+  
+  <div class="row">
+  <div class="col-xs-6">
+ 
+ 
+ 	<table class="table">
+ 	<tr>
+ 	<td>
+  Messages <span class="badge" id="message-count"></span>
+  Errors <span class="badge" id="error-count"></span>
+   </td>
+   <td>
+   <div class="btn-group" >
+   >
+   for d=120,60,30,10,5,1 {
+	   if d=%request.Get("db") {
+		  set btncls = "btn-primary"
+	   } else {
+		   set btncls = "btn-default"
+	   }
+		&html<
+		<button type="button" class="btn #(btncls)#" onclick="window.location='?db=#(d)#&el=100';">#(d)#d</button>
+  
+		>	   
+   }
+ &html<
+</div>
+   </td>
+   </tr>
+   </table>
+   <canvas id="throughput-canvas" height="450" width="600"></canvas>
+	
+  </div>
+  
+  <div class="col-xs-6">
+   <table class="table" id="event-table">
+		<caption class="text-left" id="event-table-caption"></caption>   	
+		
+   </table>
+  
+  </div>
+</div>
+
+  
+   
+</body>
+</html>
+	
+	>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetEventLogs">
+<Description>
+Return a JSON string with event log data</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>NumberOfEntries:%Integer=20</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#dim events as %ListOfObjects
+	#dim rs as %ResultSet
+	set events=##class(%ListOfObjects).%New()
+	set rs=##class(%ResultSet).%New()
+	//do rs.Prepare("SELECT TOP ? * from Ens_Util.Log ORDER BY TimeLogged DESC")
+	do rs.Prepare("SELECT TOP ? * from Ens_Util.Log")
+	do rs.Execute(NumberOfEntries)
+	while ( rs.Next() ) {
+		set item=##class(%ZEN.proxyObject).%New()
+		for i=1:1:rs.GetColumnCount() {
+			set $property(item,rs.GetColumnName(i))=rs.GetData(i)	
+		}
+		//if ( item.Type=5 ) { continue }
+		do events.Insert(item)
+	}
+	set stream=##class(%Stream.TmpCharacter).%New()
+	do ##class(%ZEN.Auxiliary.jsonArrayProvider).%WriteJSONStreamFromObject(stream,events)
+	do stream.Rewind()
+	set json=""
+    while ( 'stream.AtEnd ) { set json=json_stream.Read() }
+    return json
+]]></Implementation>
+</Method>
+
+<Method name="GetMessageCount">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DaysBack=20,ErrorsOnly=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	// for every 4 hours for each day from StartDay to Now
+	// count the number of messages processed
+	
+	set data=##class(%ListOfObjects).%New()
+	set labels = ##class(%ListOfDataTypes).%New()
+	set counts = ##class(%ListOfDataTypes).%New()
+	set now=+$h
+	Set StartDay=+$h-DaysBack
+	set slices = (now-StartDay)+1
+	set from=StartDay,to=from+1
+	
+	for i=1:1:slices {
+		
+		set rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+		if ( ErrorsOnly ) {
+			set sc=rs.Prepare("select COUNT(DISTINCT SessionId) from Ens.MessageHeader where (TimeCreated BETWEEN ? and ?) AND IsError = 1")
+		} else {
+			set sc=rs.Prepare("select COUNT(DISTINCT SessionId) from Ens.MessageHeader where TimeCreated BETWEEN ? and ?")
+			
+		}
+		set dfrom=$zd(from,3),dto=$zd(to,3)
+		set sc=rs.Execute(dfrom,dto)
+		do rs.Next()
+		//write dfrom," -> ",dto," mcount=",rs.Get("Aggregate_1"),!
+		//set dataPoint = ##class(%ZEN.proxyObject).%New()
+		//set dataPoint.Date = dfrom
+		do labels.Insert(dfrom)
+		
+		//set dataPoint.Count = rs.Get("Aggregate_1")
+		do counts.Insert( rs.Get("Aggregate_1") )
+		//do data.Insert(dataPoint)
+		set from=to,to=to+1
+		//do rs.Close()
+	}
+	set result = ##class(%ZEN.proxyObject).%New()
+	set result.labels = labels
+	set result.counts = counts
+	set stream=##class(%Stream.TmpCharacter).%New()
+	do ##class(%ZEN.Auxiliary.jsonArrayProvider).%WriteJSONStreamFromObject(stream,result)
+	do stream.Rewind()
+	set json=""
+    while ( 'stream.AtEnd ) { set json=json_stream.Read() }
+    return json
+]]></Implementation>
+</Method>
+</Class>
+</Export>
