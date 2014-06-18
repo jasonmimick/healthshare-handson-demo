@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+      @import url(http://fonts.googleapis.com/css?family=Montserrat);
+      @import url(http://fonts.googleapis.com/css?family=Open+Sans);
+      @import url(http://fonts.googleapis.com/css?family=Oxygen);
+      @import url(http://fonts.googleapis.com/css?family=Oxygen+Mono);
+      @import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(http://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(http://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {  
+		     font-family: 'Open Sans';
+			 font-size: 20px;
+		}
+	
+      h1, h2, h3 {
+        font-family: 'Open Sans';
+        font-weight: normal;
+      }
+	  h1 { 
+		font-weight: bold; 
+	  }
+	  .x-remark-slide-content { background-color: black; color: white; font-size: 200%}
+	  .remark-slide-content { color: #142966; font-size: 28px}
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# InterSystems HealthShare 
+
+### <i>Quick Technical Overview</i>
+
+---
+
+# What is HealthShare? 
+
+
+### Interoperability Engine
+
+### Informatics Platform
+
+### Rapid Application Development Environment
+
+### Massively Scalable "not-only SQL" Enterprise Database
+---
+
+## Interoperability - Ensemble
+
+* Extensible built-in standards support - HL7, ASTM, EDI, X12, DICOM, XML, +...
+
+* Out-of-box components for TCP, UDP, HTTP, REST, Email, SOAP, +...
+
+* Service Bus Implementation platform
+
+* Visual data transformations, rules, and business process designer (BPL) 
+
+* Customizable dev-ops managment and monitoring tools
+
+---
+### Visual Designers - BPL
+
+![BPL](tech-pics/bpl.png)
+
+---
+### Visual Designers - Data Transformations
+
+![Data Transformations](tech-pics/data-transform.png)
+---
+
+### Management and monitoring
+
+![Message Trace](tech-pics/trace.png)
+
+---
+## Informatics 
+
+* Built-in analytics, cubes, visualizations - DeepSee
+
+* Semantic analysis - concept/relationship mapping - iKnow
+
+* Terminology mapping
+
+* Identity Matching - Linkage Engine
+
+* Embedded clincal data model
+
+---
+
+## Application Development Environment
+
+* Core class library
+
+* Language bindings - .NET, Java, node.js, Python, Ruby, etc
+
+* SCM support, Unit Test framework
+
+* Web Development
+
+---
+## "not-only SQL" Database - Caché
+
+* Managing 80%+ of all US healthcare data for over 30 years
+* Elastic & Scalable 
+	* 500 interfaces, 16 million messages/day
+	* Financial customer - runs 15% of world-wide equity trades
+	* Small too - embedded linux/AWS free-tier
+* Full ANSI SQL, Object, and other access methods
+* Role based security infrastructure, LDAP compatible
+* Supports DR/HA schemes, SNMP
+* Core - hierachical key/value data store
+
+
+---
+## Demonstration
+
+* Create a basic HL7 message processor
+* Add conversion to SDA - Clinical data model
+
+    </textarea>
+    <script src="http://gnab.github.io/remark/downloads/remark-latest.min.js" type="text/javascript">
+    </script>
+    <script type="text/javascript">
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
