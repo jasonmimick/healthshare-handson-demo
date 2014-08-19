@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.1 (Build 608U)" ts="2014-08-19 12:08:00">
+<Class name="Demo.PatientUpdateToHTTPMessage">
+<Super>Ens.BusinessOperation</Super>
+<TimeChanged>63418,43626.660536</TimeChanged>
+<TimeCreated>63418,42065.608282</TimeCreated>
+
+<Property name="HTTPOperation">
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>HTTPOperation:Basic</Default>
+</Parameter>
+
+<Parameter name="INVOCATION">
+<Default>InProc</Default>
+</Parameter>
+
+<Method name="ConvertToHTTPMessage">
+<FormalSpec>pRequest:Demo.PatientUpdate,*pResponse:EnsLib.HTTP.GenericMessage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try {
+		set stream = ##class(%GlobalCharacterStream).%New()
+		set stream.Attributes("httprequest")="POST"
+		set stream.Attributes("content-type")="application/json"
+		set json=pRequest.toJSON()
+		$$$TRACE("json="_json)
+		do stream.Write(json)
+		set stream.Attributes("content-length")=stream.Size
+		set httpRequest=##class(EnsLib.HTTP.GenericMessage).%New(stream,,stream)
+		$$$THROWONERROR(sc,..SendRequestSync(..HTTPOperation,httpRequest,.pResponse))
+		
+	} catch error {
+		return error.AsStatus()
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<XData name="MessageMap">
+<Data><![CDATA[
+<MapItems>
+	<MapItem MessageType="Demo.PatientUpdate"> 
+		<Method>ConvertToHTTPMessage</Method>
+	</MapItem>
+</MapItems>
+]]></Data>
+</XData>
+</Class>
+</Export>
