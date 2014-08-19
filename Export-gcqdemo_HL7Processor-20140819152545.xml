@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for UNIX (Apple Mac OS X for x86-64) 2014.1 (Build 608U)" ts="2014-08-19 15:27:08">
+<Class name="Demo.HL7ToPatientUpdate">
+<Super>Ens.DataTransformDTL</Super>
+<TimeChanged>63418,41327.536691</TimeChanged>
+<TimeCreated>63418,40258.097379</TimeCreated>
+<DependsOn>EnsLib.HL7.Message,Demo.PatientUpdate</DependsOn>
+
+<XData name="DTL">
+<XMLNamespace>http://www.intersystems.com/dtl</XMLNamespace>
+<Data><![CDATA[
+<transform sourceClass='EnsLib.HL7.Message' targetClass='Demo.PatientUpdate' sourceDocType='2.5:ORU_R01' create='new' language='objectscript' >
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientName().FamilyName}' property='target.LastName' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PV1grp.PV1:AttendingDoctor()}' property='target.PrimaryPhysician' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientName().GivenName}' property='target.FirstName' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:DateTimeofBirth.Time}' property='target.DateOfBirth' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientAddress().StreetAddress}' property='street' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientAddress().City}' property='city' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientAddress().StateorProvince}' property='state' action='set' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientAddress().ZiporPostalCode}' property='zip' action='set' />
+<assign value='street_" "_city_","_state_" "_zip' property='target.Address' action='set' />
+<assign value='"SSN"' property='target.IDNames' action='insert' key='1' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:SSNNumberPatient}' property='target.IDValues' action='insert' key='1' />
+<assign value='"AccountNumber"' property='target.IDNames' action='insert' key='2' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PatientAccountNumber}' property='target.IDValues' action='insert' key='2' />
+<assign value='"PhoneNumber"' property='target.IDNames' action='insert' key='3' />
+<assign value='source.{PIDgrpgrp(1).PIDgrp.PID:PhoneNumberHome()}' property='target.IDValues' action='insert' key='3' />
+</transform>
+]]></Data>
+</XData>
+
+<Parameter name="IGNOREMISSINGSOURCE">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="REPORTERRORS">
+<Default>1</Default>
+</Parameter>
+</Class>
+
+
+<Class name="Demo.PatientUpdate">
+<Super>%Persistent,Ens.Request,%Populate</Super>
+<TimeChanged>63418,41623.999373</TimeChanged>
+<TimeCreated>63418,39612.123642</TimeCreated>
+
+<Property name="FirstName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="POPSPEC" value="FirstName()"/>
+</Property>
+
+<Property name="LastName">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="POPSPEC" value="LastName()"/>
+</Property>
+
+<Property name="DateOfBirth">
+<Type>%String</Type>
+<Parameter name="POPSPEC" value="Date()"/>
+</Property>
+
+<Property name="PrimaryPhysician">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="POPSPEC" value="Name()"/>
+</Property>
+
+<Property name="Address">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="10000"/>
+<Parameter name="POPSPEC" value=".RandomAddress()"/>
+</Property>
+
+<Property name="IDNames">
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Property name="IDValues">
+<Type>%String</Type>
+<Collection>list</Collection>
+</Property>
+
+<Method name="RandomAddress">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set street = ##class(%PopulateUtils).Street()
+	set city = ##class(%PopulateUtils).City()
+	set state = ##class(%PopulateUtils).USState()
+	set zip = ##class(%PopulateUtils).USZip()
+	return street_" "_city_","_state_" "_zip
+]]></Implementation>
+</Method>
+
+<Method name="toJSON">
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set stream = ##class(%Stream.TmpCharacter).%New()
+	$$$THROWONERROR(sc,##class(%ZEN.Auxiliary.jsonProvider).%WriteJSONStreamFromObject(stream, $this))
+	set json=""
+	while ( 'stream.AtEnd ) { set json=json_stream.Read() }
+	return json
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Demo.PatientUpdateD</DataLocation>
+<DefaultData>PatientUpdateDefaultData</DefaultData>
+<IdLocation>^Demo.PatientUpdateD</IdLocation>
+<IndexLocation>^Demo.PatientUpdateI</IndexLocation>
+<StreamLocation>^Demo.PatientUpdateS</StreamLocation>
+<ExtentSize>1</ExtentSize>
+<Data name="PatientUpdateDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>FirstName</Value>
+</Value>
+<Value name="3">
+<Value>LastName</Value>
+</Value>
+<Value name="4">
+<Value>DateOfBirth</Value>
+</Value>
+<Value name="5">
+<Value>PrimaryPhysician</Value>
+</Value>
+<Value name="6">
+<Value>Address</Value>
+</Value>
+<Value name="7">
+<Value>IDNames</Value>
+</Value>
+<Value name="8">
+<Value>IDValues</Value>
+</Value>
+</Data>
+<Property name="%%CLASSNAME">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="Address">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="DateOfBirth">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="FirstName">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="LastName">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<Property name="PrimaryPhysician">
+<Selectivity>100.0000%</Selectivity>
+</Property>
+<SQLMap name="IDKEY">
+<BlockCount>-4</BlockCount>
+</SQLMap>
+</Storage>
+</Class>
+
+
+<Class name="Demo.PatientUpdateToHTTPMessage">
+<Super>Ens.BusinessOperation</Super>
+<TimeChanged>63418,43911</TimeChanged>
+<TimeCreated>63418,42065.608282</TimeCreated>
+
+<Property name="HTTPOperation">
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>HTTPOperation:Basic</Default>
+</Parameter>
+
+<Parameter name="INVOCATION">
+<Default>InProc</Default>
+</Parameter>
+
+<Method name="ConvertToHTTPMessage">
+<FormalSpec>pRequest:Demo.PatientUpdate,*pResponse:EnsLib.HTTP.GenericMessage</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	try {
+		set stream = ##class(%GlobalCharacterStream).%New()
+		set stream.Attributes("httprequest")="POST"
+		set stream.Attributes("content-type")="application/json"
+		set json=pRequest.toJSON()
+		$$$TRACE("json="_json)
+		do stream.Write(json)
+		set stream.Attributes("content-length")=stream.Size
+		set httpRequest=##class(EnsLib.HTTP.GenericMessage).%New(stream,,stream)
+		$$$THROWONERROR(sc,..SendRequestSync(..HTTPOperation,httpRequest,.pResponse))
+		
+	} catch error {
+		return error.AsStatus()
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<XData name="MessageMap">
+<Data><![CDATA[
+<MapItems>
+	<MapItem MessageType="Demo.PatientUpdate"> 
+		<Method>ConvertToHTTPMessage</Method>
+	</MapItem>
+</MapItems>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="Demo.SDAGenerator">
+<Description>
+Convert HL7 into SDA</Description>
+<ClassType>persistent</ClassType>
+<IncludeCode>Ensemble</IncludeCode>
+<Super>Ens.BusinessProcess</Super>
+<TimeChanged>63344,44321.710184</TimeChanged>
+<TimeCreated>63344,43662.07318</TimeCreated>
+
+<Property name="TargetConfigName">
+<Description>
+The name of an operation to send the SDA to</Description>
+<Type>Ens.DataType.ConfigName</Type>
+</Property>
+
+<Parameter name="SETTINGS">
+<Type>%String</Type>
+<Default>TargetConfigName</Default>
+</Parameter>
+
+<Method name="OnRequest">
+<Description>
+Will send an Ens.StreamContainer with the SDA from this HL7 to TargetConfigName</Description>
+<FormalSpec>pRequest:Ens.Request,*pResponse:Ens.Response</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set pResponse = ##class(Ens.StringContainer).%New()
+	set sc=##class(HS.Gateway.HL7.HL7ToSDA3).GetSDA(pRequest,.sdaStream)
+	set sdaMessage = ##class(Ens.StreamContainer).%New()
+	set sdaMessage.Stream = sdaStream
+	quit:$$$ISERR(sc) sc
+	quit ..SendRequestAsync(..TargetConfigName,sdaMessage,0)
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>SDAGeneratorDefaultData</DefaultData>
+<Data name="SDAGeneratorDefaultData">
+<Subscript>"SDAGenerator"</Subscript>
+<Value name="1">
+<Value>TargetConfigName</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+
+
+<Project name="EnsExportProduction_2014-08-19 15-25-45_378-4" LastModified="2014-08-19 15:27:08.113902">
+  <ProjectDescription>Studio Project generated from Ensemble Production 'gcqdemo.HL7Processor' at 2014-08-19 19:25:45.378 UTC</ProjectDescription>
+  <Items>
+    <ProjectItem name="Demo.HL7ToPatientUpdate" type="CLS"></ProjectItem>
+    <ProjectItem name="Demo.PatientUpdate" type="CLS"></ProjectItem>
+    <ProjectItem name="Demo.PatientUpdateToHTTPMessage" type="CLS"></ProjectItem>
+    <ProjectItem name="Demo.SDAGenerator" type="CLS"></ProjectItem>
+    <ProjectItem name="gcqdemo.HL7Processor" type="CLS"></ProjectItem>
+    <ProjectItem name="gcqdemo.PatientUpdateRouterRoutingRule" type="CLS"></ProjectItem>
+    <ProjectItem name="ProductionSettings:gcqdemo.HL7Processor.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:Demo.PatientUpdateToHTTPMessage.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:Demo.SDAGenerator.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:EnsLib.HTTP.GenericOperation.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:EnsLib.TCP.PassthroughOperation.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:HTTP HL7 From Lab.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:PatientUpdateRouter.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="Settings:TCP HL7 To Archive.PTD" type="PTD"></ProjectItem>
+    <ProjectItem name="EnsExportNotes.EnsExportProduction_2014-08-19 15-25-45_378-4.PTD" type="PTD"></ProjectItem>
+  </Items>
+</Project>
+
+
+<Class name="gcqdemo.HL7Processor">
+<Super>Ens.Production</Super>
+<TimeChanged>63418,52312.925278</TimeChanged>
+<TimeCreated>63362,44751.116611</TimeCreated>
+
+<XData name="ProductionDefinition">
+<Data><![CDATA[
+<Production Name="gcqdemo.HL7Processor" LogGeneralTraceEvents="true">
+  <Description></Description>
+  <ActorPoolSize>2</ActorPoolSize>
+  <Item Name="HTTP HL7 From Lab" Category="" ClassName="EnsLib.HL7.Service.HTTPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
+    <Setting Target="Host" Name="TargetConfigNames">PatientUpdateRouter</Setting>
+    <Setting Target="Adapter" Name="Port">9980</Setting>
+  </Item>
+  <Item Name="TCP HL7 To Archive" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="IPAddress">healthshare.us</Setting>
+    <Setting Target="Adapter" Name="Port">8888</Setting>
+    <Setting Target="Adapter" Name="GetReply">0</Setting>
+  </Item>
+  <Item Name="Demo.SDAGenerator" Category="" ClassName="Demo.SDAGenerator" PoolSize="0" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Host" Name="TargetConfigName">EnsLib.TCP.PassthroughOperation</Setting>
+  </Item>
+  <Item Name="EnsLib.TCP.PassthroughOperation" Category="" ClassName="EnsLib.TCP.PassthroughOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="GetReply">0</Setting>
+    <Setting Target="Adapter" Name="IPAddress">healthshare.us</Setting>
+    <Setting Target="Adapter" Name="Port">8888</Setting>
+  </Item>
+  <Item Name="PatientUpdateRouter" Category="" ClassName="EnsLib.HL7.MsgRouter.RoutingEngine" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+    <Setting Target="Host" Name="Validation"></Setting>
+    <Setting Target="Host" Name="BusinessRuleName">gcqdemo.PatientUpdateRouterRoutingRule</Setting>
+  </Item>
+  <Item Name="EnsLib.HTTP.GenericOperation" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="HTTPPort">9292</Setting>
+    <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
+    <Setting Target="Adapter" Name="URL">/patientUpdate</Setting>
+  </Item>
+  <Item Name="Demo.PatientUpdateToHTTPMessage" Category="" ClassName="Demo.PatientUpdateToHTTPMessage" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+    <Setting Target="Host" Name="HTTPOperation">EnsLib.HTTP.GenericOperation</Setting>
+  </Item>
+</Production>
+]]></Data>
+</XData>
+</Class>
+
+
+<Class name="gcqdemo.PatientUpdateRouterRoutingRule">
+<Description>
+</Description>
+<Super>Ens.Rule.Definition</Super>
+<TimeChanged>63418,48816.7864</TimeChanged>
+<TimeCreated>63418,41374.943586</TimeCreated>
+
+<Parameter name="RuleAssistClass">
+<Default>EnsLib.HL7.MsgRouter.RuleAssist</Default>
+</Parameter>
+
+<XData name="RuleDefinition">
+<XMLNamespace>http://www.intersystems.com/rule</XMLNamespace>
+<Data><![CDATA[
+<ruleDefinition alias="" context="EnsLib.HL7.MsgRouter.RoutingEngine" production="gcqdemo.HL7Processor">
+<ruleSet name="" effectiveBegin="" effectiveEnd="">
+<rule name="" disabled="false">
+<constraint name="docCategory" value="2.5"></constraint>
+<constraint name="docName" value="ORU_R01"></constraint>
+<when condition="1">
+<send transform="Demo.HL7ToPatientUpdate" target="Demo.PatientUpdateToHTTPMessage"></send>
+<return></return>
+</when>
+</rule>
+</ruleSet>
+</ruleDefinition>
+]]></Data>
+</XData>
+</Class>
+
+
+<Document name="EnsExportNotes.EnsExportProduction_2014-08-19 15-25-45_378-4.PTD"><ProjectTextDocument name="EnsExportNotes.EnsExportProduction_2014-08-19 15-25-45_378-4" description="Export Notes for export EnsExportProduction_2014-08-19 15-25-45_378-4">
+<![CDATA[<Deployment>
+<Creation>
+<Machine>JMIMICKMBA11.LOCAL</Machine>
+<Instance>PLUTO</Instance>
+<Namespace>GCQDEMO</Namespace>
+<SourceProduction>gcqdemo.HL7Processor</SourceProduction>
+<Username>_SYSTEM</Username>
+<UTC>2014-08-19 19:27:08.111</UTC>
+</Creation>
+<Notes>
+</Notes>
+<Contents>
+<ExportProject>EnsExportProduction_2014-08-19 15-25-45_378-4</ExportProject>
+<Item num="1">Demo.HL7ToPatientUpdate.CLS</Item>
+<Item num="2">Demo.PatientUpdate.CLS</Item>
+<Item num="3">Demo.PatientUpdateToHTTPMessage.CLS</Item>
+<Item num="4">Demo.SDAGenerator.CLS</Item>
+<Item num="5">ProductionSettings:gcqdemo.HL7Processor.PTD</Item>
+<Item num="6">Settings:Demo.PatientUpdateToHTTPMessage.PTD</Item>
+<Item num="7">Settings:Demo.SDAGenerator.PTD</Item>
+<Item num="8">Settings:EnsLib.HTTP.GenericOperation.PTD</Item>
+<Item num="9">Settings:EnsLib.TCP.PassthroughOperation.PTD</Item>
+<Item num="10">Settings:HTTP HL7 From Lab.PTD</Item>
+<Item num="11">Settings:PatientUpdateRouter.PTD</Item>
+<Item num="12">Settings:TCP HL7 To Archive.PTD</Item>
+<Item num="13">gcqdemo.HL7Processor.CLS</Item>
+<Item num="14">gcqdemo.PatientUpdateRouterRoutingRule.CLS</Item>
+</Contents>
+<ProductionClassInExport>gcqdemo.HL7Processor</ProductionClassInExport>
+</Deployment>
+
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="ProductionSettings:gcqdemo.HL7Processor.PTD"><ProjectTextDocument name="ProductionSettings:gcqdemo.HL7Processor" description="Settings for production gcqdemo.HL7Processor">
+<![CDATA[<Production Name='gcqdemo.HL7Processor' LogGeneralTraceEvents='true'><Description/><ActorPoolSize>2</ActorPoolSize></Production>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:Demo.PatientUpdateToHTTPMessage.PTD"><ProjectTextDocument name="Settings:Demo.PatientUpdateToHTTPMessage" description="Settings for Demo.PatientUpdateToHTTPMessage in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="Demo.PatientUpdateToHTTPMessage" Category="" ClassName="Demo.PatientUpdateToHTTPMessage" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule=""><Setting Target="Host" Name="HTTPOperation">EnsLib.HTTP.GenericOperation</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:Demo.SDAGenerator.PTD"><ProjectTextDocument name="Settings:Demo.SDAGenerator" description="Settings for Demo.SDAGenerator in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="Demo.SDAGenerator" Category="" ClassName="Demo.SDAGenerator" PoolSize="0" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="TargetConfigName">EnsLib.TCP.PassthroughOperation</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:EnsLib.HTTP.GenericOperation.PTD"><ProjectTextDocument name="Settings:EnsLib.HTTP.GenericOperation" description="Settings for EnsLib.HTTP.GenericOperation in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="EnsLib.HTTP.GenericOperation" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="HTTPPort">9292</Setting><Setting Target="Adapter" Name="HTTPServer">localhost</Setting><Setting Target="Adapter" Name="URL">/patientUpdate</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:EnsLib.TCP.PassthroughOperation.PTD"><ProjectTextDocument name="Settings:EnsLib.TCP.PassthroughOperation" description="Settings for EnsLib.TCP.PassthroughOperation in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="EnsLib.TCP.PassthroughOperation" Category="" ClassName="EnsLib.TCP.PassthroughOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="GetReply">0</Setting><Setting Target="Adapter" Name="IPAddress">healthshare.us</Setting><Setting Target="Adapter" Name="Port">8888</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:HTTP HL7 From Lab.PTD"><ProjectTextDocument name="Settings:HTTP HL7 From Lab" description="Settings for HTTP HL7 From Lab in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="HTTP HL7 From Lab" Category="" ClassName="EnsLib.HL7.Service.HTTPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting><Setting Target="Host" Name="TargetConfigNames">PatientUpdateRouter</Setting><Setting Target="Adapter" Name="Port">9980</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:PatientUpdateRouter.PTD"><ProjectTextDocument name="Settings:PatientUpdateRouter" description="Settings for PatientUpdateRouter in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="PatientUpdateRouter" Category="" ClassName="EnsLib.HL7.MsgRouter.RoutingEngine" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule=""><Setting Target="Host" Name="Validation"></Setting><Setting Target="Host" Name="BusinessRuleName">gcqdemo.PatientUpdateRouterRoutingRule</Setting></Item>
+]]></ProjectTextDocument>
+</Document>
+
+<Document name="Settings:TCP HL7 To Archive.PTD"><ProjectTextDocument name="Settings:TCP HL7 To Archive" description="Settings for TCP HL7 To Archive in Production gcqdemo.HL7Processor">
+<![CDATA[<Item Name="TCP HL7 To Archive" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule=""><Setting Target="Adapter" Name="IPAddress">healthshare.us</Setting><Setting Target="Adapter" Name="Port">8888</Setting><Setting Target="Adapter" Name="GetReply">0</Setting></Item>
+]]></ProjectTextDocument>
+</Document></Export>
